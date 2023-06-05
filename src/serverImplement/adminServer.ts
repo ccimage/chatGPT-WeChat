@@ -5,16 +5,27 @@
  */
 import Koa = require("koa");
 import WebServer from "../middleware/WebServer";
+import ChatHandler from "../controller/Handler/ChatHandler";
 
 const path = require("path");
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-const router = require("koa-router")();
 const serve = require("koa-static");
 
 export default class AdminServer extends WebServer {
     public startServer(port: number) {
         super.addMiddleWare(this.getStaticRtx());
         return super.start(port, "0.0.0.0");
+    }
+
+    public initRoute() {
+        this.router.get("/chat", ctx => {
+            const checkRet = new ChatHandler().verifyUrl(ctx.query as any);
+            ctx.body = checkRet;
+        });
+        this.router.post("/chat", ctx => {
+            console.log("body = ", ctx.body, "query=", ctx.query);
+            const checkRet = new ChatHandler().receiveMessage(ctx.body);
+            ctx.body = checkRet;
+        });
     }
 
     private async responseTime(ctx: Koa.Context, next: any) {
@@ -26,7 +37,7 @@ export default class AdminServer extends WebServer {
     }
 
     private getStaticRtx() {
-        console.log("current path=", __dirname);
+        // console.log("current path=", __dirname);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         const publicFiles = serve(path.join(__dirname, "../../static"));
         return publicFiles;

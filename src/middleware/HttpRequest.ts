@@ -1,4 +1,4 @@
-import fetch from "node-fetch"
+import fetch from "node-fetch";
 
 export function httpGetText(site: string, query?: string): Promise<string> {
     const url = query ? `${site}?${query}` : site;
@@ -14,6 +14,24 @@ export function httpPostWithJSON(url: string, body: any, headers?: any ): Promis
     return fetch(url, {
         method: "post",
         body: JSON.stringify(body),
-        headers,
+        headers
     }).then(res => res.json());
+}
+
+/** 发送请求（默认POST） */
+export async function fetchResponse<T = any>(url: string, body: any, method: "GET" | "POST" = "POST"): Promise<[Error | null, T | null]> {
+    try {
+        const res = await fetch(url, {
+            method,
+            body: body?JSON.stringify(body):undefined,
+            headers: {
+                "Content-Type": "application/json",
+                "Connection": "keep-alive"
+            }
+        });
+        const ret = await res.json();
+        return [null, ret];
+    } catch (err) {
+        return [err as any, null];
+    }
 }

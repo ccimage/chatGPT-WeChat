@@ -1,4 +1,5 @@
 import Log = require("../common/RunLog");
+import { createHash } from "node:crypto";
 
 export default class CommonFunc {
     public static checkClientIP(req: any): boolean {
@@ -14,18 +15,17 @@ export default class CommonFunc {
                     continue;
                 }
                 if ( ipArray[i] === "127.0.0.1" ||
-                    ipArray[i].substr(0, 7) === "192.168") {
-                        return true;
-                    }
+                    ipArray[i].substring(0, 7) === "192.168") {
+                    return true;
+                }
             }
-        }
-        catch (ex) {
+        } catch (ex) {
             Log.default.assert("获取不到IP地址, from page = ", req.params[0]);
         }
         return false;
     }
 
-    public static formatDate(dt: any, format: string): string {
+    public static formatDate(dt: Date, format: string): string {
         const o: {[key: string]: any} = {
             "M+" : dt.getMonth() + 1, // month
             "d+" : dt.getDate(), // day
@@ -36,7 +36,7 @@ export default class CommonFunc {
             "S" : dt.getMilliseconds() // millisecond
         };
         if (/(y+)/.test(format))
-        format = format.replace(RegExp.$1, (dt.getFullYear() + "").substr(4 - RegExp.$1.length));
+            format = format.replace(RegExp.$1, (dt.getFullYear() + "").substr(4 - RegExp.$1.length));
         for (const k in o) {
             if (new RegExp("(" + k + ")").test(format)) {
                 const v =
@@ -54,8 +54,7 @@ export default class CommonFunc {
             req.connection.socket.remoteAddress;
 
             return ip;
-        }
-        catch (ex) {
+        } catch (ex) {
             return "";
         }
     }
@@ -63,5 +62,11 @@ export default class CommonFunc {
     // 12小时过期
     public static checkSessionTimeout(time: number) {
         return Date.now() - time > 1000 * 60 * 60 * 12;
+    }
+
+    public static sha1(text: string, salt: string) {
+        const hash = createHash("sha1");
+        hash.update(`${text}${salt}`, "utf-8");
+        return hash.digest("hex");
     }
 }

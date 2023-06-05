@@ -2,6 +2,8 @@ import Koa = require("koa");
 import views = require("koa-views");
 import RunLog from "../common/RunLog";
 
+import Router = require("koa-router");
+
 interface KoaOptions {
     env?: string | undefined;
     keys?: string[] | undefined;
@@ -14,6 +16,7 @@ interface KoaOptions {
 export default class WebServer {
     private label = "";
     private app: Koa | undefined;
+    protected router = new Router();
     public constructor(label: string, options?: KoaOptions) {
         this.label = label;
         this.init(options);
@@ -27,6 +30,11 @@ export default class WebServer {
                 extension: "html"
             })
         );
+
+        // 注册路由
+        this.app.use(this.router.routes());
+        // 自动丰富 response 相应头，当未设置响应状态(status)的时候自动设置，在所有路由中间件最后设置(全局，推荐)，也可以设置具体某一个路由（局部），例如：router.get('/index', router.allowedMethods()); 这相当于当访问 /index 时才设置
+        this.app.use(this.router.allowedMethods());
     }
 
     protected initRoute() {

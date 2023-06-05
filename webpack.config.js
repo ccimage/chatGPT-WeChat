@@ -1,16 +1,16 @@
-'use strict';
+"use strict";
 
-var path = require('path');
-var webpack = require('webpack');
-let externals = _externals();
+const path = require("path");
+const webpack = require("webpack");
+const externals = _externals();
 module.exports = {
-    mode: 'production',
-    entry: './build/server.js',
-    externals: externals,
-    target: 'node',
+    mode: "production",
+    entry: "./build/server.js",
+    externals,
+    target: "node",
     output: {
-        path: path.resolve(__dirname, 'dist/'),
-        filename: 'server.bundle.js'
+        path: path.resolve(__dirname, "dist/"),
+        filename: "server.bundle.js"
     },
     node: {
         __dirname: true
@@ -19,9 +19,9 @@ module.exports = {
         rules: [
             {
                 use: {
-                    loader: 'babel-loader',
+                    loader: "babel-loader",
                     options: {
-                        presets: [['@babel/preset-env', {
+                        presets: [["@babel/preset-env", {
                             "targets": {
                                 "node": true
                             }
@@ -39,11 +39,11 @@ module.exports = {
 };
 
 function _externals() {
-    let manifest = require('./package.json');
-    let dependencies = manifest.dependencies;
-    let externals = {};
-    for (let p in dependencies) {
-        externals[p] = 'commonjs ' + p;
+    const manifest = require("./package.json");
+    const dependencies = manifest.dependencies;
+    const externals = {};
+    for (const p in dependencies) {
+        externals[p] = "commonjs " + p;
     }
     return externals;
 }
