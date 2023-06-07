@@ -6,6 +6,8 @@
 import Koa = require("koa");
 import WebServer from "../middleware/WebServer";
 import ChatHandler from "../controller/Handler/ChatHandler";
+import { ChatGTPApi } from "../middleware/ChatGPTApi";
+import WebConstant from "../common/WebConstant";
 
 const path = require("path");
 const serve = require("koa-static");
@@ -17,15 +19,26 @@ export default class AdminServer extends WebServer {
     }
 
     public initRoute() {
+        const chatApi = new ChatGTPApi("Personal", WebConstant.chatGPT_token);
         this.router.get("/chat", ctx => {
-            const chatRet = new ChatHandler().verifyUrl(ctx.query as any);
-            ctx.body = "";
+            const checkRet = ChatHandler.verifyUrl(ctx.query as any);
+            ctx.body = checkRet;
         });
-        this.router.post("/chat", ctx => {
+        this.router.post("/chat", async ctx => {
             const param: any =  ctx.query as any;
             param.echostr = ctx.request.body;
-            const checkRet = new ChatHandler().receiveMessage(param);
-            ctx.body = checkRet;
+            const chatRet = ChatHandler.receiveMessage(param);
+            if (chatRet) {
+                try {
+                    const aiRet = await chatApi.sendChatMessage(chatRet);
+                    const aiChatBack = aiRet.choices[0].message;
+                    ctx.body = ChatHandler.createMessage(aiChatBack?.content);
+                    return;
+                } catch (err: any) {
+                    console.log("OPEN AI api err = ", err);
+                }
+            }
+            ctx.body = "";
         });
     }
 

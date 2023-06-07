@@ -16,6 +16,8 @@ export class ChatGTPApi {
             messages: [{role: "user", name: user, content: msg}],
             user
         });
-        RunLog.output("chat return = ", JSON.stringify(chatRet));
+        RunLog.output("chat return = ", chatRet.status.toString(), chatRet.statusText);
+        RunLog.output("chat data = ", JSON.stringify(chatRet.data));
+        return chatRet.data;
     }
 }

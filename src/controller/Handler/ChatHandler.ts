@@ -1,7 +1,7 @@
 import WebConstant from "../../common/WebConstant";
 import WebPageBase from "../WebPageBase";
-import { getSignature, decrypt } from "@wecom/crypto";
-import { XMLParser } from "fast-xml-parser";
+import { decrypt, encrypt , getSignature} from "@wecom/crypto";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 interface RequestFormat {
     msg_signature: string;
@@ -10,7 +10,7 @@ interface RequestFormat {
     echostr: string;
 }
 export default class ChatHandler extends WebPageBase {
-    public receiveMessage(body: RequestFormat) {
+    public static receiveMessage(body: RequestFormat) {
         try {
             const parser = new XMLParser();
             const jObj = parser.parse(body.echostr);
@@ -26,6 +26,7 @@ export default class ChatHandler extends WebPageBase {
             const chatMsg = chatData.xml.Content as string;
             const keyWord = "/prompt:";
             if (chatData.xml.MsgType === "text" && chatMsg.startsWith(keyWord)) {
+                console.log("receive prompt : ", chatMsg);
                 return chatMsg.substring(keyWord.length);
             }
             return "";
@@ -34,7 +35,7 @@ export default class ChatHandler extends WebPageBase {
         }
     }
 
-    public verifyUrl(query: RequestFormat) {
+    public static verifyUrl(query: RequestFormat) {
         // 验证算法
         // dev_msg_signature=sha1(sort(token、timestamp、nonce、msg_encrypt))。
         try {
@@ -49,5 +50,30 @@ export default class ChatHandler extends WebPageBase {
             // nothing;
         }
         return "";
+    }
+
+    public static createMessage(message?: string) {
+        try {
+            if (!message) return "";
+            // const options = {
+            //     processEntities:false,
+            //     format: true,
+            //     ignoreAttributes: false,
+            //     cdataPropName: "phone"
+            // };
+            const encryptText = encrypt(WebConstant.EncodingAESKey, message, "1");
+            const timestamp = Math.round(Date.now() / 1000);
+            const nonce = timestamp + Math.round(Math.random() * 1000);
+            const localSign = getSignature(WebConstant.Token, timestamp, nonce, encryptText);
+            const builder = new XMLBuilder();
+            return builder.build({
+                Encrypt: encryptText,
+                MsgSignature: localSign,
+                TimeStamp: timestamp,
+                Nonce: nonce
+            });
+        } catch (err: any) {
+            return err.message;
+        }
     }
 }
