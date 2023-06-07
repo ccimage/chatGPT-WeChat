@@ -28,11 +28,12 @@ export default class AdminServer extends WebServer {
             const param: any =  ctx.query as any;
             param.echostr = ctx.request.body;
             const chatRet = ChatHandler.receiveMessage(param);
-            if (chatRet) {
+            if (chatRet && typeof chatRet === "object") {
                 try {
-                    const aiRet = await chatApi.sendChatMessage(chatRet);
+                    const aiRet = await chatApi.sendChatMessage(chatRet.Message);
                     const aiChatBack = aiRet.choices[0].message;
-                    ctx.body = ChatHandler.createMessage(aiChatBack?.content);
+                    // 回复的时候，是以接收者的身份，所以反转一下
+                    ctx.body = ChatHandler.createMessage(chatRet.ToUser, chatRet.FromUser, aiChatBack?.content);
                     return;
                 } catch (err: any) {
                     console.log("OPEN AI api err = ", err);
