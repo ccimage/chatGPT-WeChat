@@ -22,8 +22,9 @@ export default class AdminServer extends WebServer {
             ctx.body = checkRet;
         });
         this.router.post("/chat", ctx => {
-            console.log("body = ", ctx.body, "query=", ctx.query);
-            const checkRet = new ChatHandler().receiveMessage(ctx.body);
+            const param: any =  ctx.query as any;
+            param.echostr = ctx.request.body;
+            const checkRet = new ChatHandler().receiveMessage(param);
             ctx.body = checkRet;
         });
     }

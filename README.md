@@ -1,2 +1,2 @@
 # chatGPT-WeChat
-use chatgpt inside wechat (wecom 企业微信)
+use chatgpt inside wecom (企业微信接入chatgpt)

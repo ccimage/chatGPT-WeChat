@@ -1,6 +1,7 @@
 import Koa = require("koa");
 import views = require("koa-views");
 import RunLog from "../common/RunLog";
+import { koaBody } from "koa-body";
 
 import Router = require("koa-router");
 
@@ -31,6 +32,8 @@ export default class WebServer {
             })
         );
 
+        // 注册body解析
+        this.app.use(koaBody());
         // 注册路由
         this.app.use(this.router.routes());
         // 自动丰富 response 相应头，当未设置响应状态(status)的时候自动设置，在所有路由中间件最后设置(全局，推荐)，也可以设置具体某一个路由（局部），例如：router.get('/index', router.allowedMethods()); 这相当于当访问 /index 时才设置

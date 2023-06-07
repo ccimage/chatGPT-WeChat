@@ -11,7 +11,11 @@ interface RequestFormat {
 export default class ChatHandler extends WebPageBase {
     public receiveMessage(body: RequestFormat) {
         // TODO: receive message from wechat
+        const localSign = getSignature(WebConstant.Token, body.timestamp, body.nonce, body.echostr);
 
+        const checkRet = localSign === body.msg_signature;
+        if (!checkRet) return false;
+        const { message } = decrypt(WebConstant.EncodingAESKey, body.echostr);
         return "";
     }
 
@@ -25,7 +29,7 @@ export default class ChatHandler extends WebPageBase {
         const checkRet = localSign === query.msg_signature;
 
         if (!checkRet) return false;
-        const {message, id} = decrypt(WebConstant.EncodingAESKey, query.echostr);
+        const { message } = decrypt(WebConstant.EncodingAESKey, query.echostr);
         return message;
     }
 }
