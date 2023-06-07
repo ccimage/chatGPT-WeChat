@@ -69,4 +69,9 @@ export default class CommonFunc {
         hash.update(`${text}${salt}`, "utf-8");
         return hash.digest("hex");
     }
+    public static md5(text: string, salt: string) {
+        const hash = createHash("md5");
+        hash.update(`${text}${salt}`, "utf-8");
+        return hash.digest("hex");
+    }
 }
