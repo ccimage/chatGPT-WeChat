@@ -18,8 +18,8 @@ export default class AdminServer extends WebServer {
 
     public initRoute() {
         this.router.get("/chat", ctx => {
-            const checkRet = new ChatHandler().verifyUrl(ctx.query as any);
-            ctx.body = checkRet;
+            const chatRet = new ChatHandler().verifyUrl(ctx.query as any);
+            ctx.body = "";
         });
         this.router.post("/chat", ctx => {
             const param: any =  ctx.query as any;
